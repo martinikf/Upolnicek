@@ -1,0 +1,91 @@
+﻿<UserControl x:Class="Upolnicek.UpolnicekWindowControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+             Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
+             Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
+             mc:Ignorable="d"
+             Name="Upolnicek">
+
+    <StackPanel>
+        <!-- Login Screen -->
+        <StackPanel Orientation="Vertical" x:Name="LoginContainerStackPanel" Visibility="Visible">
+            <Label x:Name="HeadingLabel" Margin="10,5,10,5" HorizontalAlignment="Center" FontSize="24px" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontWeight="Bold" Content="Upolníček" />
+
+            <Label x:Name="LoginErrorLabel" HorizontalAlignment="Center" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontWeight="Bold" Visibility="Collapsed">Chyba: Neúspěšné přihlášení</Label>
+
+            <Label Content="Server" HorizontalAlignment="Center" FontSize="12px" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"/>
+            <TextBox HorizontalAlignment="Center" x:Name="ServerUrlTextBox" Width="180" FontSize="12px"></TextBox>
+
+            <Label Content="E-mail" HorizontalAlignment="Center" FontSize="16px" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"/>
+            <TextBox HorizontalAlignment="Center" x:Name="LoginTextBox" Width="180" FontSize="16px"/>
+
+            <Label Content="Heslo" HorizontalAlignment="Center" FontSize="16px" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"/>
+            <PasswordBox HorizontalAlignment="Center" x:Name="PasswordPasswordBox" Width="180" FontSize="16px"/>
+
+            <CheckBox x:Name="RememberLoginCheckBox" HorizontalAlignment="Center" Margin="0,10,0,0" FontSize="14px" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}">Zapamatovat si přihlášení</CheckBox>
+
+            <Button Content="Přihlásit" Click="LoginButtonOnClick" Width="120" Height="40" x:Name="LoginButton" Margin="10,5,10,5" FontSize="16px" FontWeight="Bold"/>
+        </StackPanel>
+
+        <!-- Assignments-->
+        <StackPanel x:Name="AssignmentsContainerStackPanel" Visibility="Collapsed" Orientation="Vertical">
+            <Grid Height="{Binding ActualHeight, ElementName=Upolnicek, Mode=OneWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Column="0" Grid.Row="0" x:Name="SignOutButton" FontSize="16px" FontWeight="Bold" Click="SignOutButtonOnClick">Odhlásit se</Button>
+                <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
+                    <StackPanel Orientation="Vertical" x:Name="AssignmentsStackPanel" />
+                </ScrollViewer>
+            </Grid>
+        </StackPanel>
+
+        <!-- File Explorer -->
+        <StackPanel x:Name="FileExplorerContainerStackPanel" Orientation="Vertical" Visibility="Collapsed">
+            <Grid Height="{Binding ActualHeight, ElementName=Upolnicek, Mode=OneWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Button Content="Zpět" Click="ReturnButtonOnClick" x:Name="ReturnButton" Grid.Column="0" Grid.Row="0" FontSize="16px" FontWeight="Bold"/>
+                <Button Content="Odevzdat" Click="HandInButtonOnClick" x:Name="HandInButton" Grid.Column="1" Grid.Row="0" FontSize="16px" FontWeight="Bold"/>
+
+                <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" HorizontalAlignment="Left" Grid.ColumnSpan="2" Grid.Row="1" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
+                    <StackPanel Orientation="Vertical" x:Name="FileExplorerStackPanel"/>
+                </ScrollViewer>
+            </Grid>
+        </StackPanel>
+
+        <StackPanel x:Name="ResultContainerStackPanel" Orientation="Vertical" Visibility="Collapsed">
+            <Grid Height="{Binding ActualHeight, ElementName=Upolnicek, Mode=OneWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Row="0" Grid.Column="0" Click="ReturnFromResultButtonOnClick" FontSize="16px" FontWeight="Bold">Zpět</Button>
+                <ScrollViewer Grid.Row = "1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
+                    <StackPanel x:Name="ResultStackPanel">
+                        <Button>Test</Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
