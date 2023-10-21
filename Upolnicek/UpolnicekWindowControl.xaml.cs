@@ -34,23 +34,21 @@ namespace Upolnicek
 
             ServerUrlTextBox.Text = DEFAULT_SERVER;
 
-            new Action(async () =>
-            {
-                await LoadSettingsAsync();
-                if(!String.IsNullOrEmpty(PasswordPasswordBox.Password))
-                    await LoginAsync();
-            })();           
+            LoadSettings();
+            if(!String.IsNullOrEmpty(PasswordPasswordBox.Password))
+                _ = LoginAsync();          
         }
 
-        private async Task LoadSettingsAsync()
+        private void LoadSettings()
         {
-            var settings = await _settingsStorage.GetSettingsAsync();
+            Settings? settings = _settingsStorage.GetSettings();
+
             if (settings != null)
             {
                 _api.SetValues(settings.Value.Login, settings.Value.Password, settings.Value.Server);
 
                 var server = settings.Value.Server;
-                if(server.EndsWith("/"))
+                if (server.EndsWith("/"))
                     server = server.Substring(0, server.Length - 1);
 
                 ServerUrlTextBox.Text = server;
@@ -73,16 +71,16 @@ namespace Upolnicek
                 return;
             }
 
-            await SaveSettingsAsync();
+            SaveSettings();
             await ShowAssignmentsScreenAsync();
         }
 
-        private async Task SaveSettingsAsync()
+        private void SaveSettings()
         {
             if (RememberLoginCheckBox.IsChecked == true)
-                await _settingsStorage.SaveAsync(ServerUrlTextBox.Text, LoginTextBox.Text, PasswordPasswordBox.Password);
+                 _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, PasswordPasswordBox.Password);
             else
-                await _settingsStorage.SaveAsync(ServerUrlTextBox.Text, LoginTextBox.Text, null);
+                 _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, null);
         }
 
         private async void AssignmentButtonOnClick(int id)
@@ -105,10 +103,10 @@ namespace Upolnicek
             }
         }
 
-        private async void SignOutButtonOnClick(object sender, RoutedEventArgs e)
+        private void SignOutButtonOnClick(object sender, RoutedEventArgs e)
         {
-            await _settingsStorage.ForgetPasswordAsync();
-            await ShowLoginScreenAsync();
+            _settingsStorage.ForgetPassword();
+            ShowLoginScreen();
         }
 
         private async void ReturnButtonOnClick(object sender, RoutedEventArgs e)
@@ -181,7 +179,7 @@ namespace Upolnicek
             var builder = new AssignmentsBuilder(AssignmentButtonOnClick);
             if (!builder.Build(await _api.GetAssignmentsAsync(), AssignmentsStackPanel))
             {
-                await ShowLoginScreenAsync("Nepodařilo se načíst seznam úkolů");
+                ShowLoginScreen("Nepodařilo se načíst seznam úkolů");
             }
             else
             {
@@ -189,11 +187,11 @@ namespace Upolnicek
             }
         }
 
-        private async Task ShowLoginScreenAsync(string message = "")
+        private void ShowLoginScreen(string message = "")
         {
             ResetGUI();
 
-            await LoadSettingsAsync();
+            LoadSettings();
 
             if (!String.IsNullOrEmpty(message))
             {

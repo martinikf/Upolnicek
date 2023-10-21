@@ -4,10 +4,10 @@ namespace Upolnicek
 {
     internal interface ISettingsStorage
     {
-        Task<bool> SaveAsync(string server, string login, string password);
+        bool SaveSettings(string server, string login, string password);
 
-        Task<Settings?> GetSettingsAsync();
+        Settings? GetSettings();
 
-        Task ForgetPasswordAsync();
+        void ForgetPassword();
     }
 }

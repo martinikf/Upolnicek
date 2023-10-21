@@ -42,7 +42,7 @@
                 </Grid.RowDefinitions>
 
                 <Button Grid.Column="0" Grid.Row="0" x:Name="SignOutButton" FontSize="16px" FontWeight="Bold" Click="SignOutButtonOnClick">Odhlásit se</Button>
-                <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
+                <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
                     <StackPanel Orientation="Vertical" x:Name="AssignmentsStackPanel" />
                 </ScrollViewer>
             </Grid>

@@ -10,11 +10,11 @@ namespace Upolnicek
 {
     internal class SettingsStorage : ISettingsStorage
     {
-        public async Task<bool> SaveAsync(string server, string login, string password)
+        public bool SaveSettings(string server, string login, string password)
         {
             try
             {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                ThreadHelper.ThrowIfNotOnUIThread();
 
                 SettingsManager settingsManager = new ShellSettingsManager(ServiceProvider.GlobalProvider);
                 WritableSettingsStore userSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
@@ -35,14 +35,13 @@ namespace Upolnicek
             return true;
         }
 
-        public async Task<Settings?> GetSettingsAsync()
+        public Settings? GetSettings()
         {
             var settings = new Settings();
 
             try
             {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                
+                ThreadHelper.ThrowIfNotOnUIThread();
                 var settingsManager = new ShellSettingsManager(ServiceProvider.GlobalProvider);
                 var userSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
 
@@ -64,11 +63,11 @@ namespace Upolnicek
             return settings;
         }
 
-        public async Task ForgetPasswordAsync()
+        public void ForgetPassword()
         {
             try
             {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                ThreadHelper.ThrowIfNotOnUIThread();
 
                 var settingsManager = new ShellSettingsManager(ServiceProvider.GlobalProvider);
                 var userSettingsStore = settingsManager.GetWritableSettingsStore(SettingsScope.UserSettings);
