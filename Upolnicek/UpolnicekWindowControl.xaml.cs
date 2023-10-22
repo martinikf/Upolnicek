@@ -22,8 +22,9 @@ namespace Upolnicek
         private readonly SettingsStorage _settingsStorage;
 
         private FileExplorerTree _fileExplorerTree;
-        private int _selectedAssignmentId;
-        
+
+        private Assignment _selectedAssignment;
+
 
         public UpolnicekWindowControl()
         {
@@ -83,9 +84,10 @@ namespace Upolnicek
                  _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, null);
         }
 
-        private async void AssignmentButtonOnClick(int id)
+        private async void AssignmentButtonOnClick(Assignment ass)
         {
-            _selectedAssignmentId = id; 
+            _selectedAssignment = ass;
+
             await ShowFileExplorerScreenAsync();
         }   
 
@@ -129,7 +131,7 @@ namespace Upolnicek
                 return;
             }
 
-            var errors = await _api.HandInAssignmentAsync(_selectedAssignmentId, filesToUpload, projectPath);
+            var errors = await _api.HandInAssignmentAsync(_selectedAssignment.Id, filesToUpload, projectPath);
 
             if (errors.Count() == 0)
             {
@@ -153,7 +155,14 @@ namespace Upolnicek
             var builder = new FileExplorerBuilder(HeadingLabel.Foreground);
             _fileExplorerTree = builder.Build(FileExplorerStackPanel, await GetProjectPathAsync());
 
-            if(_fileExplorerTree == null)
+            AssignmentInfoTextBlock.Text = 
+                _selectedAssignment.CourseName + " : " + _selectedAssignment.Name + "\nOdevzdání do: " + _selectedAssignment.Deadline;
+            
+            //TODO: Add button to append description?
+            //Problems with text wrapping
+            //AssignmentInfoTextBlock.Text += "\n" + _selectedAssignment.Description;
+
+            if (_fileExplorerTree == null)
             {
                 await ShowAssignmentsScreenAsync();
                 return;

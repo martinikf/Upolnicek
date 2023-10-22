@@ -50,7 +50,7 @@ namespace Upolnicek.Builders
             return new TextBlock()
             {
                 Text = text,   
-                FontSize = 14,
+                FontSize = 12,
                 FontWeight = FontWeights.Bold,
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = _fontColor,

@@ -8,9 +8,9 @@ namespace Upolnicek.Builders
 {
     internal class AssignmentsBuilder
     {
-        private Action<int> _assignmentButtonOnClick;
+        private Action<Assignment> _assignmentButtonOnClick;
 
-        public AssignmentsBuilder(Action<int> method)
+        public AssignmentsBuilder(Action<Assignment> method)
         {
             //Onlick method for assignment button
             _assignmentButtonOnClick = method;
@@ -36,7 +36,7 @@ namespace Upolnicek.Builders
 
                         button.Click += (s, e) =>
                         {
-                            _assignmentButtonOnClick(assignment.Id);
+                            _assignmentButtonOnClick(assignment);
                         };
 
                         container.Children.Add(button);

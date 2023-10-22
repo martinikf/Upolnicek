@@ -37,7 +37,7 @@
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
@@ -56,14 +56,21 @@
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
                 <Button Content="Zpět" Click="ReturnButtonOnClick" x:Name="ReturnButton" Grid.Column="0" Grid.Row="0" FontSize="16px" FontWeight="Bold"/>
                 <Button Content="Odevzdat" Click="HandInButtonOnClick" x:Name="HandInButton" Grid.Column="1" Grid.Row="0" FontSize="16px" FontWeight="Bold"/>
 
-                <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" HorizontalAlignment="Left" Grid.ColumnSpan="2" Grid.Row="1" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
+                <Border BorderThickness="0,0,0,4" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}">
+                    <StackPanel Orientation="Vertical" Name="AssignmentInfoStackPanel">
+                        <TextBlock TextWrapping="Wrap" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}" x:Name="AssignmentInfoTextBlock" FontSize="12px" Grid.ColumnSpan="2" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" Margin="4,2,4,2">Tohle je název zadání</TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" HorizontalAlignment="Left" Grid.ColumnSpan="2" Grid.Row="3" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
                     <StackPanel Orientation="Vertical" x:Name="FileExplorerStackPanel"/>
                 </ScrollViewer>
             </Grid>
@@ -75,7 +82,7 @@
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
 
