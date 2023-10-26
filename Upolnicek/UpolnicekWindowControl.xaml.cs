@@ -42,26 +42,24 @@ namespace Upolnicek
 
         private void LoadSettings()
         {
-            Settings? settings = _settingsStorage.GetSettings();
-
-            if (settings != null)
+            try
             {
-                _api.SetValues(settings.Value.Login, settings.Value.Password, settings.Value.Server);
+                Settings? settings = _settingsStorage.GetSettings();
 
-                var server = settings.Value.Server;
-                if (server.EndsWith("/"))
-                    server = server.Substring(0, server.Length - 1);
+                if (settings != null)
+                {
+                    _api.SetValues(settings.Value.Login, settings.Value.Password, settings.Value.Server);
 
-                ServerUrlTextBox.Text = server;
-                LoginTextBox.Text = settings.Value.Login;
-                PasswordPasswordBox.Password = settings.Value.Password;
+                    var server = settings.Value.Server;
+                    if (server.EndsWith("/"))
+                        server = server.Substring(0, server.Length - 1);
+
+                    ServerUrlTextBox.Text = server;
+                    LoginTextBox.Text = settings.Value.Login;
+                    PasswordPasswordBox.Password = settings.Value.Password;
+                }
             }
-        }
-
-        private async void LoginButtonOnClick(object sender, RoutedEventArgs e)
-        {
-            _api.SetValues(LoginTextBox.Text, PasswordPasswordBox.Password, ServerUrlTextBox.Text);
-            await LoginAsync();
+            catch { }
         }
 
         private async Task LoginAsync()
@@ -79,17 +77,10 @@ namespace Upolnicek
         private void SaveSettings()
         {
             if (RememberLoginCheckBox.IsChecked == true)
-                 _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, PasswordPasswordBox.Password);
+                _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, PasswordPasswordBox.Password);
             else
-                 _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, null);
+                _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, null);
         }
-
-        private async void AssignmentButtonOnClick(Assignment ass)
-        {
-            _selectedAssignment = ass;
-
-            await ShowFileExplorerScreenAsync();
-        }   
 
         private async Task<string> GetProjectPathAsync()
         {
@@ -105,10 +96,23 @@ namespace Upolnicek
             }
         }
 
+        private async void LoginButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            _api.SetValues(LoginTextBox.Text, PasswordPasswordBox.Password, ServerUrlTextBox.Text);
+            await LoginAsync();
+        }
+
         private void SignOutButtonOnClick(object sender, RoutedEventArgs e)
         {
             _settingsStorage.ForgetPassword();
             ShowLoginScreen();
+        }
+
+        private async void AssignmentButtonOnClick(Assignment ass)
+        {
+            _selectedAssignment = ass;
+
+            await ShowFileExplorerScreenAsync();
         }
 
         private async void ReturnButtonOnClick(object sender, RoutedEventArgs e)
@@ -140,60 +144,12 @@ namespace Upolnicek
             else
             {
                 ShowResultScreen(errors, "Následující soubory se nepodařilo odevzdat");
-            }            
+            }
         }
-
+       
         private async void ReturnFromResultButtonOnClick(object sender, RoutedEventArgs e)
         {
             await ShowAssignmentsScreenAsync();
-        }
-
-        private async Task ShowFileExplorerScreenAsync(string message = "")
-        {
-            ResetGUI();
-
-            var builder = new FileExplorerBuilder(HeadingLabel.Foreground);
-            _fileExplorerTree = builder.Build(FileExplorerStackPanel, await GetProjectPathAsync());
-
-            AssignmentInfoTextBlock.Text = 
-                _selectedAssignment.CourseName + " : " + _selectedAssignment.Name + "\nOdevzdání do: " + _selectedAssignment.Deadline;
-            
-            //TODO: Add button to append description?
-            //Problems with text wrapping
-            //AssignmentInfoTextBlock.Text += "\n" + _selectedAssignment.Description;
-
-            if (_fileExplorerTree == null)
-            {
-                await ShowAssignmentsScreenAsync();
-                return;
-            }
-
-            if (!String.IsNullOrEmpty(message))
-                FileExplorerStackPanel.Children.Add(new Label
-                {
-                    Content = message,
-                    FontSize = 20,
-                    FontWeight = FontWeights.Bold,
-                    Foreground = HeadingLabel.Foreground,
-                    HorizontalAlignment = HorizontalAlignment.Center
-                });
-
-            FileExplorerContainerStackPanel.Visibility = Visibility.Visible;
-        }
-        
-        private async Task ShowAssignmentsScreenAsync()
-        {
-            ResetGUI();
-
-            var builder = new AssignmentsBuilder(AssignmentButtonOnClick);
-            if (!builder.Build(await _api.GetAssignmentsAsync(), AssignmentsStackPanel))
-            {
-                ShowLoginScreen("Nepodařilo se načíst seznam úkolů");
-            }
-            else
-            {
-                AssignmentsContainerStackPanel.Visibility = Visibility.Visible;
-            }
         }
 
         private void ShowLoginScreen(string message = "")
@@ -215,6 +171,54 @@ namespace Upolnicek
             }
 
             LoginContainerStackPanel.Visibility = Visibility.Visible;
+        }
+
+        private async Task ShowAssignmentsScreenAsync()
+        {
+            ResetGUI();
+
+            var builder = new AssignmentsBuilder(AssignmentButtonOnClick);
+            if (!builder.Build(await _api.GetAssignmentsAsync(), AssignmentsStackPanel))
+            {
+                ShowLoginScreen("Nepodařilo se načíst seznam úkolů");
+            }
+            else
+            {
+                AssignmentsContainerStackPanel.Visibility = Visibility.Visible;
+            }
+        }
+
+        private async Task ShowFileExplorerScreenAsync(string message = "")
+        {
+            ResetGUI();
+
+            var builder = new FileExplorerBuilder(HeadingLabel.Foreground);
+            _fileExplorerTree = builder.Build(FileExplorerStackPanel, await GetProjectPathAsync());
+
+            AssignmentInfoTextBlock.Text =
+                _selectedAssignment.CourseName + " : " + _selectedAssignment.Name + "\nOdevzdání do: " + _selectedAssignment.Deadline;
+
+            //TODO: Add button to append description?
+            //Problems with text wrapping
+            //AssignmentInfoTextBlock.Text += "\n" + _selectedAssignment.Description;
+
+            if (_fileExplorerTree == null)
+            {
+                await ShowAssignmentsScreenAsync();
+                return;
+            }
+
+            if (!String.IsNullOrEmpty(message))
+                FileExplorerStackPanel.Children.Add(new Label
+                {
+                    Content = message,
+                    FontSize = 20,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = HeadingLabel.Foreground,
+                    HorizontalAlignment = HorizontalAlignment.Center
+                });
+
+            FileExplorerContainerStackPanel.Visibility = Visibility.Visible;
         }
 
         private void ShowUploadScreen()
