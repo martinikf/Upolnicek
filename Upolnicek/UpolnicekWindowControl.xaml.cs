@@ -11,15 +11,14 @@ using Upolnicek.Builders;
 
 namespace Upolnicek
 {
-#pragma warning disable VSTHRD101 // Avoid unsupported async delegates
 #pragma warning disable VSTHRD100 // Avoid async void methods
 
     public partial class UpolnicekWindowControl : UserControl
     {
         private const string DEFAULT_SERVER = "https://upolnicek.inf.upol.cz";
 
-        private readonly UpolnicekAPI _api; 
-        private readonly SettingsStorage _settingsStorage;
+        private readonly IServerAPI _api; 
+        private readonly ISettingsStorage _settingsStorage;
 
         private FileExplorerTree _fileExplorerTree;
 
