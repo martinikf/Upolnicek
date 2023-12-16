@@ -1,32 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Upolnicek.Builders
 {
-    internal class ResultLogBuilder
+    internal class ResultLogBuilder : IBuilder
     {
+        private StackPanel _container;
+        private IEnumerable<string> _files;
+        private string _message;
         private Brush _fontColor;
 
-        public ResultLogBuilder(Brush fontColor)
+        public ResultLogBuilder(StackPanel container, IEnumerable<string> files, string message, Brush fontColor)
         {
             _fontColor = fontColor;
+            _container = container;
+            _files = files;
+            _message = message;
         }
 
-        public bool Build(StackPanel container, IEnumerable<string> files, string message)
+        public bool Build()
         {
             try
             {
-                container.Children.Clear();
+                _container.Children.Clear();
 
-                foreach (var file in files)
+                foreach (var file in _files)
                 {
-                    container.Children.Add(new Label
+                    _container.Children.Add(new Label
                     {
                         Content = file,
                         FontSize = 10,
@@ -34,13 +36,13 @@ namespace Upolnicek.Builders
                     });
                 }
 
-                container.Children.Insert(0, CreateTextBlock(message));
+                _container.Children.Insert(0, CreateTextBlock(_message));
 
                 return true;
             }
             catch
             {
-                container.Children.Insert(0, CreateTextBlock("Soubory nemusely být odevzdány!"));
+                _container.Children.Insert(0, CreateTextBlock("Soubory nemusely být odevzdány!"));
                 return false;
             }
         }
@@ -54,7 +56,7 @@ namespace Upolnicek.Builders
                 FontWeight = FontWeights.Bold,
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = _fontColor,
-                HorizontalAlignment = HorizontalAlignment.Center
+                HorizontalAlignment = HorizontalAlignment.Left
             };
         }
     }

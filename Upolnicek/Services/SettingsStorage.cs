@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.Shell;
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Upolnicek
 {

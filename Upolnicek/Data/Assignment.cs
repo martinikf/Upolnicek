@@ -1,4 +1,4 @@
-﻿namespace Upolnicek
+﻿namespace Upolnicek.Data
 {
     internal class Assignment
     {

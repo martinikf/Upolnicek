@@ -30,8 +30,28 @@
             <Button Content="Přihlásit" Click="LoginButtonOnClick" Width="120" Height="40" x:Name="LoginButton" Margin="10,5,10,5" FontSize="16px" FontWeight="Bold"/>
         </StackPanel>
 
-        <!-- Assignments-->
+        <!-- Assignments -->
         <StackPanel x:Name="AssignmentsContainerStackPanel" Visibility="Collapsed" Orientation="Vertical">
+            <Grid Height="{Binding ActualHeight, ElementName=Upolnicek, Mode=OneWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <Button Grid.Column="0" Grid.Row="0" x:Name="SignOutButton" FontSize="14px" FontWeight="Bold" Click="SignOutButtonOnClick">Odhlásit se</Button>
+                <Button Grid.Column="1" Grid.Row="0" x:Name="TasksButton" FontSize="14px" FontWeight="Bold" Click="TasksButtonOnClick">Nepřijaté úkoly</Button>
+                <ScrollViewer Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
+                    <StackPanel Orientation="Vertical" x:Name="AssignmentsStackPanel" />
+                </ScrollViewer>
+            </Grid>
+        </StackPanel>
+
+        <!-- Tasks -->
+        <StackPanel x:Name="TasksContainerStackPanel" Visibility="Collapsed" Orientation="Vertical">
             <Grid Height="{Binding ActualHeight, ElementName=Upolnicek, Mode=OneWay}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition></ColumnDefinition>
@@ -41,10 +61,12 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <Button Grid.Column="0" Grid.Row="0" x:Name="SignOutButton" FontSize="16px" FontWeight="Bold" Click="SignOutButtonOnClick">Odhlásit se</Button>
-                <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
-                    <StackPanel Orientation="Vertical" x:Name="AssignmentsStackPanel" />
+                <Button Grid.Column="0" Grid.Row="0" x:Name="BackFromTasksButton" FontSize="14px" FontWeight="Bold" Click="BackFromTasksButtonOnClick">Zpět</Button>
+
+                <ScrollViewer Grid.Row="2" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
+                    <StackPanel Orientation="Vertical" x:Name="TasksStackPanel" />
                 </ScrollViewer>
+
             </Grid>
         </StackPanel>
 
@@ -61,8 +83,8 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <Button Content="Zpět" Click="ReturnButtonOnClick" x:Name="ReturnButton" Grid.Column="0" Grid.Row="0" FontSize="16px" FontWeight="Bold"/>
-                <Button Content="Odevzdat" Click="HandInButtonOnClick" x:Name="HandInButton" Grid.Column="1" Grid.Row="0" FontSize="16px" FontWeight="Bold"/>
+                <Button Content="Zpět" Click="ReturnButtonOnClick" x:Name="ReturnButton" Grid.Column="0" Grid.Row="0" FontSize="14px" FontWeight="Bold"/>
+                <Button Content="Odevzdat" Click="HandInButtonOnClick" x:Name="HandInButton" Grid.Column="1" Grid.Row="0" FontSize="14px" FontWeight="Bold"/>
 
                 <Border BorderThickness="0,0,0,4" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}">
                     <StackPanel Orientation="Vertical" Name="AssignmentInfoStackPanel">
@@ -86,10 +108,9 @@
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
 
-                <Button Grid.Row="0" Grid.Column="0" Click="ReturnFromResultButtonOnClick" FontSize="16px" FontWeight="Bold">Zpět</Button>
+                <Button Grid.Row="0" Grid.Column="0" Click="ReturnFromResultButtonOnClick" FontSize="14px" FontWeight="Bold">Zpět</Button>
                 <ScrollViewer Grid.Row = "1" Grid.Column="0" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=Upolnicek, Mode=OneWay}">
                     <StackPanel x:Name="ResultStackPanel">
-                        <Button>Test</Button>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>

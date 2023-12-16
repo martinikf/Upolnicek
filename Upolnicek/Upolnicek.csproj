@@ -53,8 +53,13 @@
   <ItemGroup>
     <Compile Include="Builders\AssignmentsBuilder.cs" />
     <Compile Include="Builders\FileExplorerBuilder.cs" />
+    <Compile Include="Builders\IBuilder.cs" />
     <Compile Include="Builders\ResultLogBuilder.cs" />
+    <Compile Include="Builders\TasksBuilder.cs" />
     <Compile Include="Data\Assignment.cs" />
+    <Compile Include="Data\Course.cs" />
+    <Compile Include="Data\CourseTask.cs" />
+    <Compile Include="Data\CourseTasks.cs" />
     <Compile Include="Data\FileCheckBox.cs" />
     <Compile Include="Data\FileExplorerTree.cs" />
     <Compile Include="Services\IServerAPI.cs" />

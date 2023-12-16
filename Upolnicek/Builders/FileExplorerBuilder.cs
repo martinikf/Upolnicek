@@ -1,38 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows;
 using System.IO;
 using System.Windows.Media;
 
 namespace Upolnicek.Builders
 {
-    internal class FileExplorerBuilder
+    internal class FileExplorerBuilder : IBuilder
     {
         private FileExplorerTree _fileExplorerTree;
         private Brush _fontColor;
+        private StackPanel _container;
+        private string _projectPath;
 
-        public FileExplorerBuilder(Brush fontColor)
+        public FileExplorerBuilder(StackPanel container, string projectPath, Brush fontColor)
         {
             _fontColor = fontColor;
+            _container = container;
+            _projectPath = projectPath;
         }
 
-        public FileExplorerTree Build(StackPanel container, string projectPath)
+        public FileExplorerTree FileExplorerTree()
+        {
+            return _fileExplorerTree;
+        }
+
+        public bool Build()
         {
             try
             {
-                container.Children.Clear();
+                _container.Children.Clear();
 
-                var directoryInfo = new DirectoryInfo(projectPath);
-                InsertDirectory(directoryInfo, container);
+                var directoryInfo = new DirectoryInfo(_projectPath);
+                InsertDirectory(directoryInfo, _container);
 
-                return _fileExplorerTree;
+                return true;
             }
             catch
             {
                 //Probably happend because of: wrong path; os forbid access to file/dir
-                return null;
+                return false;
             }
         }
 

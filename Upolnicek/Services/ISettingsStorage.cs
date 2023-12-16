@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-
+﻿
 namespace Upolnicek
 {
     internal interface ISettingsStorage

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Upolnicek.Builders;
+using Upolnicek.Data;
 
 namespace Upolnicek
 {
@@ -21,9 +22,7 @@ namespace Upolnicek
         private readonly ISettingsStorage _settingsStorage;
 
         private FileExplorerTree _fileExplorerTree;
-
         private Assignment _selectedAssignment;
-
 
         public UpolnicekWindowControl()
         {
@@ -61,8 +60,17 @@ namespace Upolnicek
             catch { }
         }
 
+        private void SaveSettings()
+        {
+            if (RememberLoginCheckBox.IsChecked == true)
+                _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, PasswordPasswordBox.Password);
+            else
+                _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, null);
+        }
+
         private async Task LoginAsync()
         {
+           
             if (await _api.AuthenticateAsync() == false)
             {
                 LoginErrorLabel.Visibility = Visibility.Visible;
@@ -70,15 +78,8 @@ namespace Upolnicek
             }
 
             SaveSettings();
-            await ShowAssignmentsScreenAsync();
-        }
 
-        private void SaveSettings()
-        {
-            if (RememberLoginCheckBox.IsChecked == true)
-                _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, PasswordPasswordBox.Password);
-            else
-                _settingsStorage.SaveSettings(ServerUrlTextBox.Text, LoginTextBox.Text, null);
+            await ShowAssignmentsScreenAsync();
         }
 
         private async Task<string> GetProjectPathAsync()
@@ -97,6 +98,9 @@ namespace Upolnicek
 
         private async void LoginButtonOnClick(object sender, RoutedEventArgs e)
         {
+            if (ServerUrlTextBox.Text[ServerUrlTextBox.Text.Length - 1] == '/')
+                ServerUrlTextBox.Text = ServerUrlTextBox.Text.Substring(0, ServerUrlTextBox.Text.Length - 1);
+
             _api.SetValues(LoginTextBox.Text, PasswordPasswordBox.Password, ServerUrlTextBox.Text);
             await LoginAsync();
         }
@@ -114,7 +118,25 @@ namespace Upolnicek
             await ShowFileExplorerScreenAsync();
         }
 
+        private async void TaskButtonOnClick(CourseTask task)
+        {
+            ResetGUI();
+
+            await _api.AcceptTaskAsync(task.Id);
+            await ShowAssignmentsScreenAsync();
+        }
+
         private async void ReturnButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            await ShowAssignmentsScreenAsync();
+        }
+
+        private async void TasksButtonOnClick(object sender, RoutedEventArgs e)
+        {
+            await ShowTasksScreenAsync();
+        }
+
+        private async void BackFromTasksButtonOnClick(object sender, RoutedEventArgs e)
         {
             await ShowAssignmentsScreenAsync();
         }
@@ -176,8 +198,8 @@ namespace Upolnicek
         {
             ResetGUI();
 
-            var builder = new AssignmentsBuilder(AssignmentButtonOnClick);
-            if (!builder.Build(await _api.GetAssignmentsAsync(), AssignmentsStackPanel))
+            var builder = new AssignmentsBuilder(AssignmentsStackPanel, await _api.GetAssignmentsAsync(), AssignmentButtonOnClick);
+            if (!builder.Build())
             {
                 ShowLoginScreen("Nepodařilo se načíst seznam úkolů");
             }
@@ -187,12 +209,30 @@ namespace Upolnicek
             }
         }
 
+        private async Task ShowTasksScreenAsync()
+        {
+            ResetGUI();
+
+            var builder = new TasksBuilder(TasksStackPanel, await _api.GetTasksAsync(), TaskButtonOnClick);
+            if (!builder.Build())
+            {
+                ShowLoginScreen("Nepodařilo se načíst seznam úkolů");
+            }
+            else
+            {
+                TasksContainerStackPanel.Visibility = Visibility.Visible;
+            }
+        }
+
         private async Task ShowFileExplorerScreenAsync(string message = "")
         {
             ResetGUI();
 
-            var builder = new FileExplorerBuilder(HeadingLabel.Foreground);
-            _fileExplorerTree = builder.Build(FileExplorerStackPanel, await GetProjectPathAsync());
+            var builder = new FileExplorerBuilder(FileExplorerStackPanel, await GetProjectPathAsync(), HeadingLabel.Foreground);
+            if (builder.Build())
+                _fileExplorerTree = builder.FileExplorerTree();
+            else
+                _fileExplorerTree = null;
 
             AssignmentInfoTextBlock.Text =
                 _selectedAssignment.CourseName + " : " + _selectedAssignment.Name + "\nOdevzdání do: " + _selectedAssignment.Deadline;
@@ -211,7 +251,7 @@ namespace Upolnicek
                 FileExplorerStackPanel.Children.Add(new Label
                 {
                     Content = message,
-                    FontSize = 20,
+                    FontSize = 16,
                     FontWeight = FontWeights.Bold,
                     Foreground = HeadingLabel.Foreground,
                     HorizontalAlignment = HorizontalAlignment.Center
@@ -243,13 +283,12 @@ namespace Upolnicek
         {
             ResetGUI();
 
-            var resultBuilder = new ResultLogBuilder(HeadingLabel.Foreground);
-            if(!resultBuilder.Build(ResultStackPanel, files, message))
+            var resultBuilder = new ResultLogBuilder(ResultStackPanel, files, message, HeadingLabel.Foreground);
+            if(resultBuilder.Build())
             {
-                //Unexpected error -> shouldn't happen
+                ResultContainerStackPanel.Visibility = Visibility.Visible;
             }
-
-            ResultContainerStackPanel.Visibility = Visibility.Visible;
+            //else -> unexpected behaviour
         }
 
         private void ResetGUI()
@@ -261,10 +300,12 @@ namespace Upolnicek
             AssignmentsStackPanel.Children.Clear();
             FileExplorerStackPanel.Children.Clear();
             ResultStackPanel.Children.Clear();
+            TasksStackPanel.Children.Clear();
 
             //Containers
             ResultContainerStackPanel.Visibility = Visibility.Collapsed;
             AssignmentsContainerStackPanel.Visibility = Visibility.Collapsed;
+            TasksContainerStackPanel.Visibility = Visibility.Collapsed;
             FileExplorerContainerStackPanel.Visibility = Visibility.Collapsed;
             LoginContainerStackPanel.Visibility = Visibility.Collapsed;
 

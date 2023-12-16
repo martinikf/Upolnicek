@@ -1,16 +1,20 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Upolnicek.Data;
 
 namespace Upolnicek
 {
-    internal class UpolnicekAPI : IServerAPI
+    internal class UpolnicekAPI : IServerAPI, IDisposable
     {
+        private HttpClient _httpClient;
+
         private string _serverUrl;       
         private string _login;
         private string _password;
@@ -18,8 +22,11 @@ namespace Upolnicek
         private string _token;
         private int _userId;
 
+        private DateTime tokenValidity = DateTime.Now;
+
         public UpolnicekAPI()
         {
+            _httpClient = new HttpClient();
         }
 
         public void SetValues(string login, string password, string server)
@@ -27,6 +34,17 @@ namespace Upolnicek
             _serverUrl = server;
             _login = login;
             _password = password;
+        }
+
+        private void UpdateClient()
+        {
+            if (_httpClient.BaseAddress is null)
+            {
+                _httpClient.BaseAddress = new Uri(_serverUrl);
+            }
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + _token);
+            _httpClient.DefaultRequestHeaders.Add("Cookie", "token=" + _token);
         }
 
         public async Task<bool> AuthenticateAsync()
@@ -57,6 +75,7 @@ namespace Upolnicek
 
                     _userId = root.GetProperty("user").GetProperty("id").GetInt32();
                     _token = root.GetProperty("token").GetString();
+                    UpdateClient();
                 }
 
                 return _token != null;
@@ -67,50 +86,152 @@ namespace Upolnicek
             }
         }
 
+        private async Task<IEnumerable<Course>> GetCoursesAsync()
+        {
+            return await GetObjectsAsync<Course>("/api/courses/user" + "?userId=" + _userId, ParseCourses);
+        }
+
+        public async Task<IEnumerable<CourseTasks>> GetTasksAsync()
+        {
+            var cTasks = new List<CourseTasks>();
+            foreach (var course in await GetCoursesAsync()) {
+                cTasks.Add(new CourseTasks(course, await GetObjectsAsync<CourseTask>("/api/tasks/course" + "?courseId=" + course.Id, ParseTasks)));
+            }
+            return cTasks;
+        }
+
         public async Task<IEnumerable<Assignment>> GetAssignmentsAsync()
         {
-            if(_token == null)
+            return await GetObjectsAsync<Assignment>("/api/assignments/user" + "?userId=" + _userId, ParseAssignments);
+        }
+
+        private async Task<IEnumerable<T>> GetObjectsAsync<T> (string path, Func<JsonDocument, IEnumerable<T>> parser)
+        {
+            if (_token == null)
                 return null;
 
-            IEnumerable<Assignment> assignments = null;
-
+            IEnumerable<T> values = null;
             try
             {
-                var client = new HttpClient();
-                client.BaseAddress = new Uri(_serverUrl + "/api/assignments/user" + "?userId=" + _userId);
-                client.DefaultRequestHeaders.Accept.Clear();
-
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _token);
-                client.DefaultRequestHeaders.Add("Cookie", "token=" + _token);
-   
-                await ExtendTokenValidityAsync();
-
-                var response = (await client.GetAsync("")).Content.ReadAsStringAsync();
-                var jsonDoc = JsonDocument.Parse(await response);
-
-                await Task.Run(() => assignments = Parse(jsonDoc));
+                var json = await GetRequestAsync(path);
+                await Task.Run(() => values = parser(json));
             }
             catch
             {
-                //Couldn't load tasks / parse json
+                //Error
             }
 
-            return assignments;
+            return values;
         }
 
-        private IEnumerable<Assignment> Parse(JsonDocument jsonDoc)
+        private async Task<JsonDocument> GetRequestAsync(string path, bool skipExtend = false)
+        {
+            try
+            {
+                if(!skipExtend)
+                    await ExtendTokenValidityAsync();
+
+                var response = (await _httpClient.GetAsync(path)).Content.ReadAsStringAsync();
+                return JsonDocument.Parse(await response);
+            }
+            catch
+            {
+                await Console.Out.WriteLineAsync("Error GetRequestAsync: " + path);
+                return null;
+            }
+        }
+
+        public async Task<bool> AcceptTaskAsync(int taskId) {
+            try
+            {
+                await ExtendTokenValidityAsync();
+
+                var data = new
+                {
+                    taskId = taskId.ToString(),
+                    studentId = _userId.ToString()
+                };
+
+                var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync("/api/assignment/add", content);
+
+                return response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                //Couldn't load ass / parse json
+                return false;
+            }
+        }
+
+        private IEnumerable<Course> ParseCourses(JsonDocument jsonDoc) { 
+            
+            var courses = new List<Course>();
+
+            try
+            {
+                foreach (var course in jsonDoc.RootElement.GetProperty("studentCourses").EnumerateArray())
+                {
+                    courses.Add(
+                        new Course(
+                            course.GetProperty("id").GetInt32(),
+                            course.GetProperty("name").GetString()));
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Error while parsing courses json.");
+            }
+
+            return courses;
+        }
+
+        private IEnumerable<CourseTask> ParseTasks(JsonDocument jsonDoc) {
+
+            //Ignores already accepted tasks -> not null in assignment property
+            var tasks = new List<CourseTask>();
+
+            try
+            {
+                foreach(var task in jsonDoc.RootElement.EnumerateArray())
+                {
+                    if(task.GetProperty("assignment").ValueKind != JsonValueKind.Null)
+                        continue;
+
+                    tasks.Add(
+                        new CourseTask(
+                            task.GetProperty("id").GetInt32(),
+                            task.GetProperty("name").GetString()));
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Error while parsing tasks json");
+            }
+
+            return tasks; 
+        }
+
+        private IEnumerable<Assignment> ParseAssignments(JsonDocument jsonDoc)
         {
             var assignments = new List<Assignment>();
 
-            foreach (var assignment in jsonDoc.RootElement.GetProperty("studentAssignments").EnumerateArray())
+            try
             {
-                assignments.Add(
-                    new Assignment(
-                        assignment.GetProperty("id").GetInt32(),
-                        assignment.GetProperty("Task").GetProperty("name").GetString(),
-                        assignment.GetProperty("Task").GetProperty("description").GetString(),
-                        assignment.GetProperty("Task").GetProperty("deadline").GetString(),
-                        assignment.GetProperty("Course").GetProperty("name").GetString()));
+                foreach (var assignment in jsonDoc.RootElement.GetProperty("studentAssignments").EnumerateArray())
+                {
+                    assignments.Add(
+                        new Assignment(
+                            assignment.GetProperty("id").GetInt32(),
+                            assignment.GetProperty("Task").GetProperty("name").GetString(),
+                            assignment.GetProperty("Task").GetProperty("description").GetString(),
+                            assignment.GetProperty("Task").GetProperty("deadline").GetString(),
+                            assignment.GetProperty("Course").GetProperty("name").GetString()));
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Error while parsing assignments json.");
             }
 
             return assignments;
@@ -125,7 +246,6 @@ namespace Upolnicek
 
             try
             {
-                using (var client = new HttpClient())
                 using (var formData = new MultipartFormDataContent())
                 {
                     foreach (var path in filePaths)
@@ -141,17 +261,14 @@ namespace Upolnicek
                         }
                     }
 
-                    client.DefaultRequestHeaders.Add("Authorization", "Bearer " + _token);
-                    client.DefaultRequestHeaders.Add("Cookie", "token=" + _token);
+                    await ExtendTokenValidityAsync();
 
                     var url = _serverUrl + "/api/version/add" + "?assignmentId=" + assignmentId;
                     formData.Add(new StringContent(assignmentId.ToString()), "assignmentId");
 
-                    await ExtendTokenValidityAsync();
-
                     try
                     {
-                        var response = await client.PostAsync(url, formData);
+                        var response = await _httpClient.PostAsync(url, formData);
 
                         if (response.StatusCode != HttpStatusCode.OK)
                             error.UnionWith(filePaths);
@@ -173,8 +290,21 @@ namespace Upolnicek
     
         private async Task ExtendTokenValidityAsync()
         {
-            //TODO: rewrite to use api call for extending token validity instead of authenticating again
-            await AuthenticateAsync(); //extending token validity
+            if (tokenValidity.AddHours(2) < DateTime.Now)
+            {
+                await AuthenticateAsync();
+            }
+            else
+            {
+                await GetRequestAsync("/api/auth/extendToken", true);
+            }
+
+            tokenValidity = DateTime.Now;
+        }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
         }
     }
 }

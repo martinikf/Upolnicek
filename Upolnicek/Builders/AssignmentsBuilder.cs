@@ -1,28 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Upolnicek.Data;
 
 
 namespace Upolnicek.Builders
 {
-    internal class AssignmentsBuilder
+    internal class AssignmentsBuilder : IBuilder
     {
         private Action<Assignment> _assignmentButtonOnClick;
+        private StackPanel _container;
+        private IEnumerable<Assignment> _assignments;
 
-        public AssignmentsBuilder(Action<Assignment> method)
+        public AssignmentsBuilder(StackPanel container, IEnumerable<Assignment> assignments, Action<Assignment> method)
         {
             //Onlick method for assignment button
             _assignmentButtonOnClick = method;
+            _container = container;
+            _assignments = assignments;
         }
 
-        public bool Build(IEnumerable<Assignment> assignments, StackPanel container)
+        public bool Build()
         { 
             try {
-                container.Children.Clear();
+                _container.Children.Clear();
 
-                foreach (var assignment in assignments)
+                var lastCourse = String.Empty;
+
+                foreach (var assignment in _assignments.OrderBy(x=>x.CourseName))
                 {
+                    if(lastCourse != assignment.CourseName)
+                    {
+                        lastCourse = assignment.CourseName;
+
+                        var courseLabel = new Label
+                        {
+                            Content = assignment.CourseName,
+                            FontSize = 14,
+                            HorizontalAlignment = HorizontalAlignment.Left
+                        };
+                        _container.Children.Add(courseLabel);
+                    }
+
                     try
                     {
                         var button = new Button
@@ -39,7 +60,7 @@ namespace Upolnicek.Builders
                             _assignmentButtonOnClick(assignment);
                         };
 
-                        container.Children.Add(button);
+                        _container.Children.Add(button);
                     }
                     catch
                     {
