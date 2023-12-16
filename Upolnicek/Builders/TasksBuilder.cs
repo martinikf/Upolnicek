@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows;
+using System.Windows.Media;
 using Upolnicek.Data;
 
 namespace Upolnicek.Builders
@@ -12,12 +13,15 @@ namespace Upolnicek.Builders
         private Action<CourseTask> _taskButtonOnClick;
         private StackPanel _container;
         private IEnumerable<CourseTasks> _courseTasks;
+        private Brush _fontColor;
 
-        public TasksBuilder(StackPanel container, IEnumerable<CourseTasks> courseTasks, Action<CourseTask> method)
+
+        public TasksBuilder(StackPanel container, IEnumerable<CourseTasks> courseTasks, Action<CourseTask> method, Brush fontColor)
         {
             _taskButtonOnClick = method;
             _container = container;
             _courseTasks = courseTasks;
+            _fontColor = fontColor;
         }
 
         public bool Build()
@@ -33,7 +37,8 @@ namespace Upolnicek.Builders
                         Name= "TasksNoTasksLabel",
                         Content = "Žádné úkoly",
                         FontSize = 16,
-                        HorizontalAlignment = HorizontalAlignment.Center
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Foreground = _fontColor
                     };
 
                     _container.Children.Add(label);
@@ -59,7 +64,8 @@ namespace Upolnicek.Builders
                             Content = cTask.course.Name,
                             FontSize = 14,
                             HorizontalAlignment = HorizontalAlignment.Left,
-                            VerticalAlignment = VerticalAlignment.Center
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Foreground = _fontColor
                         };
                         courseStackPanel.Children.Add(courseLabel);
 

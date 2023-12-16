@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Upolnicek.Data;
 
 
@@ -13,13 +14,15 @@ namespace Upolnicek.Builders
         private Action<Assignment> _assignmentButtonOnClick;
         private StackPanel _container;
         private IEnumerable<Assignment> _assignments;
+        private Brush _fontColor;
 
-        public AssignmentsBuilder(StackPanel container, IEnumerable<Assignment> assignments, Action<Assignment> method)
+        public AssignmentsBuilder(StackPanel container, IEnumerable<Assignment> assignments, Action<Assignment> method, Brush fontColor)
         {
             //Onlick method for assignment button
             _assignmentButtonOnClick = method;
             _container = container;
             _assignments = assignments;
+            _fontColor = fontColor;
         }
 
         public bool Build()
@@ -39,7 +42,8 @@ namespace Upolnicek.Builders
                         {
                             Content = assignment.CourseName,
                             FontSize = 14,
-                            HorizontalAlignment = HorizontalAlignment.Left
+                            HorizontalAlignment = HorizontalAlignment.Left,
+                            Foreground = _fontColor
                         };
                         _container.Children.Add(courseLabel);
                     }

@@ -198,7 +198,7 @@ namespace Upolnicek
         {
             ResetGUI();
 
-            var builder = new AssignmentsBuilder(AssignmentsStackPanel, await _api.GetAssignmentsAsync(), AssignmentButtonOnClick);
+            var builder = new AssignmentsBuilder(AssignmentsStackPanel, await _api.GetAssignmentsAsync(), AssignmentButtonOnClick, HeadingLabel.Foreground);
             if (!builder.Build())
             {
                 ShowLoginScreen("Nepodařilo se načíst seznam úkolů");
@@ -213,7 +213,7 @@ namespace Upolnicek
         {
             ResetGUI();
 
-            var builder = new TasksBuilder(TasksStackPanel, await _api.GetTasksAsync(), TaskButtonOnClick);
+            var builder = new TasksBuilder(TasksStackPanel, await _api.GetTasksAsync(), TaskButtonOnClick, HeadingLabel.Foreground);
             if (!builder.Build())
             {
                 ShowLoginScreen("Nepodařilo se načíst seznam úkolů");

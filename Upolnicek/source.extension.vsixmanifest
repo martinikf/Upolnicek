@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Upolnicek.4355b0e2-41fe-47e9-bb83-b4ede780ab96" Version="2.5" Language="en-US" Publisher="Filip Martiník" />
+        <Identity Id="Upolnicek.4355b0e2-41fe-47e9-bb83-b4ede780ab96" Version="3.0" Language="en-US" Publisher="Filip Martiník" />
         <DisplayName>Upolnicek</DisplayName>
         <Description xml:space="preserve">Upolníček - rozšíření, pro IDE Visual Studio 2022, sloužící k odevzdávání úkolů na katedře informatiky Univerzity Palackého v Olomouci - https://www.inf.upol.cz/ </Description>
         <MoreInfo>https://github.com/martinikf/Upolnicek</MoreInfo>
